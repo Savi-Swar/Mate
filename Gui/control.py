@@ -102,6 +102,13 @@ class MainWindow(QMainWindow):
             if e.key() == Qt.Key_V:
                 s = "ClAWDOWN"   
                 ser.write(s.encode())
+            if e.key() == Qt.Key_N:
+                s = "CLAWIN"
+                ser.write(s.encode())
+
+            if e.key() == Qt.Key_M:
+                s = "CLAWOUT"   
+                ser.write(s.encode())
         
 
     def keyReleaseEvent(self, e):

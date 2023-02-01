@@ -6,19 +6,19 @@ class Button(QPushButton):
     def __init__(self, icon, tip):
         super().__init__()
 
-        self.setFocusPolicy(Qt.NoFocus)
+        # self.setFocusPolicy(Qt.NoFocus)
 
         self.setStyleSheet("""
             QPushButton {
-                background: rgb(35, 35, 35);
+                background: rgb(255,163,185);
                 border-radius: 5px
             }
             QPushButton:hover {
-                background: rgb(50,50,50)
+                background: rgb(255,123,98);
+                border-radius:5
             }
         """)
-
+        self.setText(tip)
         self.setIcon(QIcon(icon))
         self.setIconSize(QSize(40,40))
-
         self.setToolTip(tip)

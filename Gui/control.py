@@ -9,7 +9,7 @@ import serial
 
 from button import Button
 
-ser = serial.Serial(port="/dev/cu.usbmodem101", baudrate=9600) 
+# ser = serial.Serial(port="/dev/cu.usbmodem101", baudrate=9600) 
 
 class MainWindow(QMainWindow):
 
@@ -57,6 +57,60 @@ class MainWindow(QMainWindow):
 
         self.frame.setLayout(self.frame.layout)
         self.setCentralWidget(self.frame)
+    # Layout 1
+    # def keyPressEvent(self, e):
+    #     if e.isAutoRepeat():
+    #         if e.key() == Qt.Key_W:
+    #             s = "FORWARD"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_A:
+    #             s = "LEFT"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_S:
+    #             s = "BACKWARD"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_D:
+    #             s = "RIGHT"   
+    #             ser.write(s.encode())
+    #         if e.key() == Qt.Key_U:
+    #             s = "UP"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_I:
+    #             s = "DOWN"   
+    #             ser.write(s.encode())
+    #         if e.key() == Qt.Key_T:
+    #             s = "CAMUP"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_Y:
+    #             s = "CAMDOWN"   
+    #             ser.write(s.encode())
+    #         if e.key() == Qt.Key_F:
+    #             s = "CLAWUP"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_C:
+    #             s = "CLAWRIGHT"   
+    #             ser.write(s.encode())
+    #         if e.key() == Qt.Key_B:
+    #             s = "CLAWLEFT"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_V:
+    #             s = "ClAWDOWN"   
+    #             ser.write(s.encode())
+    #         if e.key() == Qt.Key_N:
+    #             s = "CLAWIN"
+    #             ser.write(s.encode())
+
+    #         if e.key() == Qt.Key_M:
+    #             s = "CLAWOUT"   
+    #             ser.write(s.encode())
+    # Layout 2
     def keyPressEvent(self, e):
         if e.isAutoRepeat():
             if e.key() == Qt.Key_W:
@@ -84,32 +138,23 @@ class MainWindow(QMainWindow):
             if e.key() == Qt.Key_T:
                 s = "CAMUP"
                 ser.write(s.encode())
-
             if e.key() == Qt.Key_Y:
                 s = "CAMDOWN"   
                 ser.write(s.encode())
-            if e.key() == Qt.Key_F:
-                s = "CLAWUP"
-                ser.write(s.encode())
-
-            if e.key() == Qt.Key_C:
-                s = "CLAWRIGHT"   
-                ser.write(s.encode())
-            if e.key() == Qt.Key_B:
-                s = "CLAWLEFT"
-                ser.write(s.encode())
-
-            if e.key() == Qt.Key_V:
-                s = "ClAWDOWN"   
-                ser.write(s.encode())
             if e.key() == Qt.Key_N:
-                s = "CLAWIN"
+                s = "CLAWOPEN"
                 ser.write(s.encode())
 
             if e.key() == Qt.Key_M:
-                s = "CLAWOUT"   
+                s = "CLAWCLOSE"   
+                ser.write(s.encode()) 
+            if e.key() == Qt.Key_1:
+                s = "Inc"
                 ser.write(s.encode())
-        
+            if e.key() == Qt.Key_2:
+                s = dec
+                ser.write(s.encode())
+                
 
     def keyReleaseEvent(self, e):
         s = "OFF"   

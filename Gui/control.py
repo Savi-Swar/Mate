@@ -152,7 +152,13 @@ class MainWindow(QMainWindow):
                 s = "Inc"
                 ser.write(s.encode())
             if e.key() == Qt.Key_2:
-                s = dec
+                s = "Dec"
+                ser.write(s.encode())
+            if e.key() == Qt.Key_Z:
+                s = "TiltUp"
+                ser.write(s.encode())
+            if e.key() == Qt.Key_X:
+                s = "TiltDown"
                 ser.write(s.encode())
                 
 

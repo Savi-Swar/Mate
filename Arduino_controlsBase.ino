@@ -50,15 +50,15 @@ void loop() {
        servo5.writeMicroseconds(maxSpeed);
        servo1.writeMicroseconds(1500);
        servo2.writeMicroseconds(1500);
-       servo3.writeMicroseconds(maxSpeed);
-       servo4.writeMicroseconds(maxSpeed);    
+       servo3.writeMicroseconds((maxSpeed-1500)/2 + 1500);
+       servo4.writeMicroseconds((maxSpeed-1500)/2 + 1500);    
        }
     if (x.equals("DOWN")) {
        servo5.writeMicroseconds(minSpeed);
        servo1.writeMicroseconds(1500);
        servo2.writeMicroseconds(1500);
-       servo3.writeMicroseconds(minSpeed);
-       servo4.writeMicroseconds(minSpeed); 
+       servo3.writeMicroseconds((minSpeed-1500)/2 + 1500);
+       servo4.writeMicroseconds((minSpeed-1500)/2 + 1500); 
           }
     if (x.equals("LEFT")) {
        servo5.writeMicroseconds(1500);
@@ -146,16 +146,33 @@ void loop() {
         servo10_pos = 0;
       }  
        servo9.write(servo9_pos);
-                        }
+     }
 
-         if (x.equals(1) {   
-            maxSpeed++;
-            minSpeed--;
-                        }
-         if (x.equals(2) {   
-            maxSpeed--;
-            minSpeed++;
-            }
+    if (x.equals(1) {   
+      maxSpeed++;
+      minSpeed--;
+                  }
+    if (x.equals(2) {   
+      maxSpeed--;
+      minSpeed++;
+    }
+    if (x.equals("TiltUp")) {
+       servo5.writeMicroseconds(maxSpeed);
+       servo1.writeMicroseconds(1500);
+       servo2.writeMicroseconds(1500);
+       servo3.writeMicroseconds(minSpeed);
+       servo4.writeMicroseconds(minSpeed);    
+       }
+    if (x.equals("TiltDown")) {
+       servo5.writeMicroseconds(minSpeed);
+       servo1.writeMicroseconds(1500);
+       servo2.writeMicroseconds(1500);
+       servo3.writeMicroseconds(maxSpeed);
+       servo4.writeMicroseconds(maxSpeed); 
+          }
+
+    
+          
       
 
   }

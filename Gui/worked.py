@@ -11,14 +11,22 @@ import time
 
 from button import Button
 
-
-# With these lines:
-ser = serial.Serial(port='/dev/cu.usbserial-1220', baudrate=115200, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
+ser = serial.Serial(port='/dev/cu.usbserial-1220', baudrate=9600, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
 
 # Check if the connection is successful
 
 HEADER = b'\xab'
 FOOTER = b'\xb3'
+forwByte = b'\xA3'
+backByte = b'\xA4'
+upByte = b'\xA5'
+downByte = b'\xA6'
+rightByte = b'\xA7'
+leftByte = b'\xA8'
+servOpenByte = b'\xA9'
+servCloseByte = b'\xA0'
+stopByte = b'\xB5'
+msg = b'\xB7'
 
 def foo(msg):
     if type(msg) == bytes:
@@ -30,10 +38,7 @@ def foo(msg):
         out |= (0 if bit else 1)
         out <<= 1
     return bytes([out >> 1])
-
 class MainWindow(QMainWindow):
-
-    
     
     def __init__(self):
         super().__init__()
@@ -55,13 +60,17 @@ class MainWindow(QMainWindow):
         self.logo = QLabel(self)
         self.pixmap = QPixmap('logo.png')
         self.logo.setPixmap(self.pixmap)
-        self.logo.resize(self.pixm  ap.width(),
+        self.logo.resize(self.pixmap.width(),
                           self.pixmap.height())
+        
+        self.label = QLabel("Your Text", self)  # Add this line
   
-        # self.label.setFont(QFont('Arial', 25))
+        self.label.setFont(QFont('Arial', 25))
         self.cam = CamWindow()
         self.addBar = QHBoxLayout()
-        # self.frame.layout.addWidget(self.addBar)
+        addBarWidget = QWidget()
+        addBarWidget.setLayout(self.addBar)
+        self.frame.layout.addWidget(addBarWidget)
         self.frame.layout.addWidget(self.cam)
         self.b_auto.clicked.connect(self.AutoWindow)
         self.b_settings.clicked.connect(self.Set)
@@ -73,11 +82,8 @@ class MainWindow(QMainWindow):
 
         self.frame.layout.addWidget(self.b_sensor)
 
-
-
         self.frame.setLayout(self.frame.layout)
         self.setCentralWidget(self.frame)
-
 
         self.serial_thread = SerialThread(ser)
         self.serial_thread.received_data.connect(self.handle_received_data)
@@ -89,36 +95,68 @@ class MainWindow(QMainWindow):
 
     # Layout 1
     def keyPressEvent(self, e):
+        global msg
         if e.isAutoRepeat():
 
             if e.key() == Qt.Key_W: # FORWARD
-                
-                ser.write(foo(struct.pack("<c", foo(HEADER))))
-                ser.write(struct.pack("<c", foo(1)))
-                ser.write(struct.pack("<c", foo(FOOTER)))
-
-                # val = struct.pack(">cHc", HEADER, 0, FOOTER)
-                # print(f"writing {val}")
-                # ser.write(val)
-
-
+                if msg != forwByte:
+                    msg = forwByte
+                    ser.write(HEADER)
+                    ser.write(forwByte)
+                    ser.write(FOOTER)
+                    print("forward")
 
             if e.key() == Qt.Key_A: # LEFT
-                ser.write(struct.pack(">cHc", HEADER, 2, FOOTER))
+                if msg != leftByte:
+                        msg = leftByte
+                        ser.write(HEADER)
+                        ser.write(leftByte)
+                        ser.write(FOOTER)
+                        print("left")
 
             if e.key() == Qt.Key_S: # BACKWARD
-                ser.write(struct.pack(">cHc", HEADER, 1, FOOTER))
+                if msg != backByte:
+                    msg = backByte
+                    ser.write(HEADER)
+                    ser.write(backByte)
+                    ser.write(FOOTER)
+                    print("backward")
 
             if e.key() == Qt.Key_D: # RIGHT
-                ser.write(struct.pack(">cHc", HEADER, 3, FOOTER))
+                if msg != rightByte:
+
+                    msg = rightByte
+                    ser.write(HEADER)
+                    ser.write(rightByte)
+                    ser.write(FOOTER)
+                    print("right")
           
             if e.key() == Qt.Key_U: #UP
-                ser.write(struct.pack(">cHc", HEADER, 5, FOOTER))
+                if msg != upByte:
+
+                    msg = upByte
+                    ser.write(HEADER)
+                    ser.write(upByte)
+                    ser.write(FOOTER)
+                    print("up")
 
             if e.key() == Qt.Key_I: # DOWN
-                ser.write(struct.pack(">cHc", HEADER, 4, FOOTER))
+                if msg != downByte:
+
+                    msg = downByte
+                    ser.write(HEADER)
+                    ser.write(downByte)
+                    ser.write(FOOTER)
+                    print("down")
+
             if e.key() == Qt.Key_X: # OFF
-                ser.write(struct.pack(">cHc", HEADER, 7, FOOTER))
+                if msg != stopByte:
+
+                    msg = stopByte
+                    ser.write(HEADER)
+                    ser.write(stopByte)
+                    ser.write(FOOTER)
+                    print("off")
           
             # if e.key() == Qt.Key_T:
             #     s = "CAMUP"
@@ -128,36 +166,32 @@ class MainWindow(QMainWindow):
             #     s = "CAMDOWN"   
             #     ser.write(struct.pack(">cHc", HEADER, 8, FOOTER))
            
-            # if e.key() == Qt.Key_N:
-            #     s = "CLAWOPEN"
-            #     ser.write(struct.pack(">cHc", HEADER, 9, FOOTER))
+            if e.key() == Qt.Key_N:
+                if msg != servOpenByte:
 
-            # if e.key() == Qt.Key_M:
-            #     s = "CLAWCLOSE"   
-            #     ser.write(struct.pack(">cHc", HEADER, 10, FOOTER))
+                    msg = servOpenByte
+                    ser.write(HEADER)
+                    ser.write(servOpenByte)
+                    ser.write(FOOTER)
+                    print("clawopen")
            
-            # if e.key() == Qt.Key_1:
-            #     s = "Inc"
-            #     ser.write(s.encode())
-            # if e.key() == Qt.Key_2:
-            #     s = "Dec"
-            #     ser.write(s.encode())
-            # if e.key() == Qt.Key_Z:
-            #     s = "TiltUp"
-            #     ser.write(s.encode())
-            # if e.key() == Qt.Key_X:
-            #     s = "TiltDown"
-            #     ser.write(s.encode())
 
+            if e.key() == Qt.Key_M:
+                if msg != servCloseByte:
+
+                    msg = servCloseByte
+                    ser.write(HEADER)
+                    ser.write(servCloseByte)
+                    ser.write(FOOTER)
+                    print("clawclose")
                 
 
-    # def keyReleaseEvent(self, e):
-    #     s = "OFF"
-    #     ser.write(s.encode())
-
-
-
-
+    def keyReleaseEvent(self, e):
+        global msg
+        ser.write(HEADER)
+        ser.write(stopByte)
+        ser.write(FOOTER)
+        msg = stopByte
 
     def AutoWindow(self, checked):
         self.w = AutomationWindow()
@@ -248,6 +282,3 @@ if __name__ == '__main__':
     window.show()
 
     app.exec()
-
-    
-

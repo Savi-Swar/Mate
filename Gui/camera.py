@@ -5,6 +5,9 @@ from PyQt5 import QtCore
 from numpy import ndarray
 import cv2
 import serial
+import numpy as np
+from cv.seagrass import count_squares
+
 
 
 
@@ -71,7 +74,24 @@ class Camera(QWidget):
         p = convert_to_Qt_format.scaled(720, 480, Qt.AspectRatioMode.KeepAspectRatio)
         return QPixmap.fromImage(p)
 
+    def capture_and_identify_coral(self):
+        # Get the current frame from the camera
+        current_frame = self.viewfinder.pixmap().toImage()
 
+        # Convert the QImage to a numpy array (cv2 image)
+        shape = (current_frame.height(), current_frame.width(), 3)
+        current_frame = current_frame.convertToFormat(QImage.Format.Format_RGB888)
+        ptr = current_frame.bits()
+        ptr.setsize(current_frame.byteCount())
+        current_frame = np.array(ptr).reshape(shape)
+
+        # Convert the RGB888 image to BGR format for OpenCV
+        current_frame = cv2.cvtColor(current_frame, cv2.COLOR_RGB2BGR)
+
+        # Call the identify_coral function and print the results
+        green_squares = count_squares(current_frame)
+        print("Number of green squares:", green_squares)
+        
 class VideoThread(QThread):
     change_pixmap_signal = pyqtSignal(ndarray)
 

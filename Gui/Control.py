@@ -27,6 +27,14 @@ servOpenByte = b'\xA9'
 servCloseByte = b'\xA0'
 stopByte = b'\xB5'
 msg = b'\xB7'
+precision = b'\xF1'
+regular = b'\xF2'
+rapid = b'\xF3'
+pitchUpByte = b'\xC1'
+pitchDownByte = b'\xC2'
+rollRightByte = b'\xC3'
+rollLeftByte = b'\xC4'
+speed = 2
 
 def foo(msg):
     if type(msg) == bytes:
@@ -38,6 +46,19 @@ def foo(msg):
         out |= (0 if bit else 1)
         out <<= 1
     return bytes([out >> 1])
+
+def sendSerial(data):
+
+        ser.write(HEADER)
+        if speed == 1:
+            speedByte = precision
+        elif speed == 2:
+            speedByte = regular
+        elif speed == 3:
+            speedByte = rapid
+        ser.write(speedByte)
+        ser.write(data)
+        ser.write(FOOTER)
 class MainWindow(QMainWindow):
     
     def __init__(self):
@@ -96,102 +117,104 @@ class MainWindow(QMainWindow):
     # Layout 1
     def keyPressEvent(self, e):
         global msg
+        global speed
         if e.isAutoRepeat():
 
             if e.key() == Qt.Key_W: # FORWARD
                 if msg != forwByte:
                     msg = forwByte
-                    ser.write(HEADER)
-                    ser.write(forwByte)
-                    ser.write(FOOTER)
-                    print("forward")
+                    sendSerial(forwByte)
+
 
             if e.key() == Qt.Key_A: # LEFT
                 if msg != leftByte:
-                        msg = leftByte
-                        ser.write(HEADER)
-                        ser.write(leftByte)
-                        ser.write(FOOTER)
-                        print("left")
+                    msg = leftByte
+                    sendSerial(leftByte)
+
 
             if e.key() == Qt.Key_S: # BACKWARD
                 if msg != backByte:
                     msg = backByte
-                    ser.write(HEADER)
-                    ser.write(backByte)
-                    ser.write(FOOTER)
-                    print("backward")
+                    sendSerial(backByte)
+
 
             if e.key() == Qt.Key_D: # RIGHT
                 if msg != rightByte:
 
                     msg = rightByte
-                    ser.write(HEADER)
-                    ser.write(rightByte)
-                    ser.write(FOOTER)
-                    print("right")
+                    sendSerial(rightByte)
+
           
             if e.key() == Qt.Key_U: #UP
                 if msg != upByte:
 
                     msg = upByte
-                    ser.write(HEADER)
-                    ser.write(upByte)
-                    ser.write(FOOTER)
-                    print("up")
+                    sendSerial(upByte)
+
 
             if e.key() == Qt.Key_I: # DOWN
                 if msg != downByte:
 
                     msg = downByte
-                    ser.write(HEADER)
-                    ser.write(downByte)
-                    ser.write(FOOTER)
-                    print("down")
+                    sendSerial(downByte)
 
             if e.key() == Qt.Key_X: # OFF
-                if msg != stopByte:
-
                     msg = stopByte
-                    ser.write(HEADER)
-                    ser.write(stopByte)
-                    ser.write(FOOTER)
-                    print("off")
+                    sendSerial(stopByte)
+
+            if e.key() == Qt.Key_T:
+                if msg != pitchUpByte:
+
+                    msg = pitchUpByte
+                    sendSerial(pitchUpByte)
+            if e.key() == Qt.Key_Y:
+                if msg != pitchDownByte:
+
+                    msg = pitchDownByte
+                    sendSerial(pitchDownByte)
+            if e.key() == Qt.Key_G:
+                if msg != rollLeftByte:
+
+                    msg = rollLeftByte
+                    sendSerial(rollLeftByte)
+            if e.key() == Qt.Key_H:
+                if msg != rollRightByte:
+
+                    msg = rollRightByte
+                    sendSerial(rollRightByte)
           
-            # if e.key() == Qt.Key_T:
-            #     s = "CAMUP"
-            #     ser.write(struct.pack(">cHc", HEADER, 7, FOOTER))
-         
-            # if e.key() == Qt.Key_Y:
-            #     s = "CAMDOWN"   
-            #     ser.write(struct.pack(">cHc", HEADER, 8, FOOTER))
            
+           
+        if not e.isAutoRepeat():
+            if e.key() == Qt.Key_O:
+                speed = 3
+            if e.key() == Qt.Key_K:
+                speed = 2
+            if e.key() == Qt.Key_L:
+                speed = 1
             if e.key() == Qt.Key_N:
+
                 if msg != servOpenByte:
 
                     msg = servOpenByte
-                    ser.write(HEADER)
-                    ser.write(servOpenByte)
-                    ser.write(FOOTER)
-                    print("clawopen")
+                    sendSerial(servOpenByte)
+
            
 
             if e.key() == Qt.Key_M:
                 if msg != servCloseByte:
 
                     msg = servCloseByte
-                    ser.write(HEADER)
-                    ser.write(servCloseByte)
-                    ser.write(FOOTER)
-                    print("clawclose")
+                    sendSerial(servCloseByte)
+
+
+            
                 
 
     def keyReleaseEvent(self, e):
         global msg
-        ser.write(HEADER)
-        ser.write(stopByte)
-        ser.write(FOOTER)
         msg = stopByte
+        sendSerial(stopByte)
 
     def AutoWindow(self, checked):
         self.w = AutomationWindow()
@@ -210,7 +233,7 @@ class SerialThread(QThread):
         while True:
             raw_data = self.port.read()
             print(f"Raw data: {raw_data}")
-            data = foo(raw_data).hex()
+            data = raw_data.hex()
             self.received_data.emit(data)
 class AutomationWindow(QWidget):
     """

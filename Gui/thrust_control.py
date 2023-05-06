@@ -14,16 +14,16 @@ class SerialComms:
     # default front axis (move forward)
     def forward(self, speed=1, offset=0):
         assert -1 <= speed <= 1
-        self.values[0] += 125 * speed - offset * speed
-        self.values[1] += 125 * speed + offset * speed
+        self.values[0] += 125 * speed - offset * 125 * speed
+        self.values[1] += 125 * speed + offset * 125 * speed
 
     # no strafe (z axis)
 
     # default up/down (y axis)
     def up(self, speed=1, offset=0):
         self.values[2] += 125 * speed
-        self.values[3] += 125 * speed - offset * speed
-        self.values[4] += 125 * speed + offset * speed
+        self.values[3] += 125 * speed - offset * 125 * speed
+        self.values[4] += 125 * speed + offset * 125 * speed
 
     # default roll (roll cw)
     def roll(self, speed=1):

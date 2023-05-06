@@ -22,6 +22,8 @@ class MainWindow(QMainWindow):
 
         # setting font and size
 
+        self.speed_label = QLabel("H Speed: 0.4 + 0.00R, V Speed: 0.04 + 0.00R")
+        self.status_label = QLabel("[]")
         self.b_auto = Button("Gui/img/automation.png", "Automation Panel")
         self.b_settings = Button("Gui/img/automation.png", "Settings Panel")
         self.b_sensor = Button("Gui/img/automation.png", "Sensor Panel")
@@ -49,6 +51,9 @@ class MainWindow(QMainWindow):
 
         self.frame.layout.addWidget(self.logo)
 
+        self.frame.layout.addWidget(self.speed_label)
+        self.frame.layout.addWidget(self.status_label)
+
         self.frame.layout.addWidget(self.b_auto)
         self.frame.layout.addWidget(self.b_settings)
 
@@ -63,29 +68,36 @@ class MainWindow(QMainWindow):
         #self.serial_thread.received_data.connect(self.handle_received_data)
         #self.serial_thread.start()
 
-        self.sc = SerialComms("/dev/ttyu8")#cu.usbserial-1210")
+        self.sc = SerialComms("/dev/cu.usbserial-1210")
         self.horiz_speed = 0.32
         self.vert_speed = 0.32
         self.horiz_offset = 0.0
         self.vert_offset = 0.0
+
+        self.updateSpeedLabel()
  
     @pyqtSlot(str)
     def handle_received_data(self, data):
         print(data)
 
+    def updateSpeedLabel(self):
+        self.speed_label.setText(f"H Speed: {self.horiz_speed:.2f} {'+' if self.horiz_offset >= 0 else '-'} {abs(self.horiz_offset):.2f}, \
+        V Speed: {self.vert_speed:.2f} {'+' if self.vert_offset >= 0 else '-'} {abs(self.vert_offset):.2f}")
+        self.status_label.setText(str(self.sc.values))
+
     def keyEvent(self, key, m):
         if key == Qt.Key_W:
-            self.sc.forward(self.horiz_speed * m, horiz_offset)
+            self.sc.forward(self.horiz_speed * m, self.horiz_offset)
         if key == Qt.Key_S:
-            self.sc.forward(-self.horiz_speed * m, horiz_offset)
+            self.sc.forward(-self.horiz_speed * m, self.horiz_offset)
         if key == Qt.Key_D:
             self.sc.yaw(self.horiz_speed * m)
         if key == Qt.Key_A:
             self.sc.yaw(-self.horiz_speed * m)
         if key == Qt.Key_Q:
-            self.sc.up(self.vert_speed * m, vert_offset)
+            self.sc.up(self.vert_speed * m, self.vert_offset)
         if key == Qt.Key_E:
-            self.sc.up(-self.vert_speed * m, vert_offset)
+            self.sc.up(-self.vert_speed * m, self.vert_offset)
         if key == Qt.Key_L:
             self.sc.roll(self.vert_speed * m)
         if key == Qt.Key_J:
@@ -106,32 +118,35 @@ class MainWindow(QMainWindow):
             if key == Qt.Key_4:
                 self.vert_speed += 0.04
             if key == Qt.Key_5:
-                self.horiz_offset -= 0.04
+                self.horiz_offset -= 0.01
             if key == Qt.Key_6:
-                self.horiz_offset += 0.04
+                self.horiz_offset += 0.01
             if key == Qt.Key_7:
-                self.vert_offset -= 0.04
+                self.vert_offset -= 0.01
             if key == Qt.Key_8:
-                self.vert_offset += 0.04    
+                self.vert_offset += 0.01    
             if key == Qt.Key_C:
                 self.sc.claw(20)
             if key == Qt.Key_V:
                 self.sc.claw(-20)
+            if key == Qt.Key_Backspace:
+                self.sc.reset()
 
         self.horiz_speed = max(0.04, min(1, self.horiz_speed))
         self.vert_speed = max(0.04, min(1, self.vert_speed))
 
         self.sc.update()
+        self.updateSpeedLabel()
 
     # Layout 1
     def keyPressEvent(self, e):
         if e.isAutoRepeat():
             pass
         if not e.isAutoRepeat():
-            keyEvent(self, e.key(), 1)
+            self.keyEvent(e.key(), 1)
 
     def keyReleaseEvent(self, e):
-        keyEvent(self, e.key(), -1)
+        self.keyEvent(e.key(), -1)
 
     def AutoWindow(self, checked):
         self.w = AutomationWindow()

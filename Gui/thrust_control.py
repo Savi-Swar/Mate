@@ -6,10 +6,15 @@ class SerialComms:
     def __init__(self, port):
         self.ser = serial.Serial(port=port, baudrate=9600, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
         self.values = [125, 125, 125, 125, 125, 150]
+        self.neutral_offset = [0, 0, 15, 15, 15, 0]
+        self.enable_neutral = False
         #              l    r    b    fl   fr   claw
 
+    def get_real_values(self):
+        return [self.values[i] + (self.neutral_offset[i] if self.enable_neutral else 0) for i in range(6)]
+
     def update(self):
-        self.ser.write(bytes([0x7a, *[max(0, min(250, round(i))) for i in self.values], 0xa7]))
+        self.ser.write(bytes([0x7a, *[max(0, min(250, round(i))) for i in self.get_real_values()], 0xa7]))
 
     # default front axis (move forward)
     def forward(self, speed=1, offset=0):
@@ -48,6 +53,10 @@ class SerialComms:
 
     def reset(self):
         self.values = [125, 125, 125, 125, 125, 150]
+        self.enable_neutral = False
+
+    def toggle_neutral(self):
+        self.enable_neutral = not self.enable_neutral
 
 if __name__ == "__main__":
     sc = SerialComms(input("port: "))

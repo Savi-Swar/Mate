@@ -83,8 +83,9 @@ class MainWindow(QMainWindow):
 
     def updateSpeedLabel(self):
         self.speed_label.setText(f"H Speed: {self.horiz_speed:.2f} {'+' if self.horiz_offset >= 0 else '-'} {abs(self.horiz_offset):.2f}, \
-        V Speed: {self.vert_speed:.2f} {'+' if self.vert_offset >= 0 else '-'} {abs(self.vert_offset):.2f}")
-        self.status_label.setText(str(self.sc.values))
+        V Speed: {self.vert_speed:.2f} {'+' if self.vert_offset >= 0 else '-'} {abs(self.vert_offset):.2f}, \
+        neutral buoyancy: {'enabled' if self.sc.enable_neutral else 'disabled'}")
+        self.status_label.setText(str(self.sc.get_real_values()))
 
     def keyEvent(self, key, m):
         if key == Qt.Key_W:
@@ -132,6 +133,8 @@ class MainWindow(QMainWindow):
                 self.sc.claw(-20)
             if key == Qt.Key_Backspace:
                 self.sc.reset()
+            if key == Qt.Key_P:
+                self.sc.toggle_neutral()
 
         self.horiz_speed = max(0.04, min(1, self.horiz_speed))
         self.vert_speed = max(0.04, min(1, self.vert_speed))

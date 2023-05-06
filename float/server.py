@@ -1,8 +1,13 @@
 import socket
+from datetime import datetime
+import time
+
+def get_local_time():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Configure server settings
-server_ip = "0.0.0.0" # Listen on all available network interfaces
-server_port = 8080
+server_ip = "192.168.13.100" # Listen on all available network interfaces
+server_port = 8081
 
 # Create a socket and bind it to the server IP and port
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,8 +27,17 @@ while True:
     print(f"Received data: {data}")
 
     if data == "check_start_signal":
+
+        local_time = get_local_time() + '\n'
+        print(local_time)
         start_signal = input("Enter 'start' to start the program or anything else to wait: ")
-        client_socket.sendall(start_signal.encode("utf-8"))
+        start_signal += '\n'
+        # client_socket.sendall(local_time.encode('utf-8'))
+        # client_socket.sendall(start_signal.encode("utf-8"))
+        
+        # Send the local time with a delimiter (e.g., '|')
+        
+
         print("Raw data:", data.encode("utf-8"))  # This will print the raw bytes received
 
     else:
@@ -31,7 +45,6 @@ while True:
         print(f"Received data: {data}")
 
     client_socket.close()
-
 
 # Close the server socket (this line will not be reached in the current implementation)
 server_socket.close()

@@ -13,6 +13,8 @@ const byte rightByte = 0xA7;
 const byte leftByte = 0xA8;
 const byte servOpenByte = 0xA9;
 const byte servCloseByte = 0xA0;
+const byte servHookByte = 0xA1;
+
 const byte stopByte = 0xB5;
 const byte precision = 0xF1;
 const byte regular = 0xF2;
@@ -101,7 +103,7 @@ void process(byte command) {
   switch (command) {
     case forwByte: 
       // Handle command 1: Forward
-      T1001.writeMicroseconds(1500+0.8*(t100revSpeed-1500));
+      T1001.writeMicroseconds(t100revSpeed);
       T1002.writeMicroseconds(t100revSpeed); //may have to change to revMax depending on direction of T100 thruster
       T601.writeMicroseconds(tStop);
       T602.writeMicroseconds(tStop);
@@ -128,7 +130,7 @@ void process(byte command) {
       break;
     case rightByte:
       // Handle command 4: Right
-      T1001.writeMicroseconds(1500+0.8*(t100revSpeed-1500));
+      T1001.writeMicroseconds(t100revSpeed);
       T1002.writeMicroseconds(t100forSpeed); //may have to change to forwMax depending on direction of T100 thruster
       T601.writeMicroseconds(tStop);
       T602.writeMicroseconds(tStop);
@@ -137,7 +139,7 @@ void process(byte command) {
       break;
     case leftByte:
       // Handle command 5: Left
-      T1001.writeMicroseconds(1500+0.8*(t100forSpeed-1500));
+      T1001.writeMicroseconds(1500+1*(t100forSpeed-1500));
       T1002.writeMicroseconds(t100revSpeed); //may have to change to revMax depending on direction of T100 thruster
       T601.writeMicroseconds(tStop);
       T602.writeMicroseconds(tStop);
@@ -146,7 +148,7 @@ void process(byte command) {
       break;
     case backByte:
       // Handle command 6: Backward
-      T1001.writeMicroseconds(1500+0.8*(t100forSpeed-1500));
+      T1001.writeMicroseconds(1500+1*(t100forSpeed-1500));
       T1002.writeMicroseconds(t100forSpeed); //may have to change to forwMax depending on direction of T100 thruster
       T601.writeMicroseconds(tStop);
       T602.writeMicroseconds(tStop);
@@ -162,9 +164,14 @@ void process(byte command) {
       T603.writeMicroseconds(tStop);
       Serial.println("Stop");
       break;
+    case servHookByte: //servo close
+       
+       clawServ.write(60);
+       delay(100);
     case servCloseByte: //servo close
        
-       clawServ.write(70);
+       clawServ.write(60);
+       delay(100);
 		 break;
     case servOpenByte: //servo open
         clawServ.write(180);

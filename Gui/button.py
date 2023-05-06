@@ -11,11 +11,9 @@ class Button(QPushButton):
         self.setStyleSheet("""
             QPushButton {
                 background: rgb(255,163,185);
-                border-radius: 5px
             }
             QPushButton:hover {
                 background: rgb(255,123,98);
-                border-radius:5
             }
         """)
         self.setText(tip)

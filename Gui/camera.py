@@ -21,13 +21,19 @@ class CamWindow(QWidget):
 
 
         self.layout = QHBoxLayout()
+
+        self.layout.addWidget(Camera(0, "Front View", True))
         self.layout.addWidget(Camera(0, "Rear View"))
-        self.layout.addWidget(Camera(0, "Front View"))
+
+        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setSpacing(0)
         self.setLayout(self.layout)
 
 
 class Camera(QWidget):
-    def __init__(self, port, message):
+    def __init__(self, port, message, vertical=False):
+
+        self.vertical = vertical
         
         super().__init__()
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
@@ -47,11 +53,12 @@ class Camera(QWidget):
 
         self.label_1 = QLabel(message, self)
         self.label_1.setFont(QFont('Arial', 30))
-        self.label_1.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_1.setAlignment(QtCore.Qt.AlignTop)
+        self.label_1.setAlignment(QtCore.Qt.AlignHCenter)
+        # self.label_1.setAlignment(QtCore.Qt.AlignTop)
 
 
-
+        # self.layout.setContentsMargins(0,0,0,0)
+        # self.layout.setSpacing(0)
         self.layout.addWidget(self.label_1)
         self.setLayout(self.layout)
         
@@ -64,6 +71,8 @@ class Camera(QWidget):
     @pyqtSlot(ndarray)
     def update_image(self, cv_img):
         qt_img = self.convert_cv_qt(cv_img)
+        if self.vertical:
+            qt_img = qt_img.transformed(QTransform().rotate(90))
         self.viewfinder.setPixmap(qt_img)
 
     def convert_cv_qt(self, cv_img):

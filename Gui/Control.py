@@ -11,7 +11,8 @@ import time
 
 from button import Button
 
-ser = serial.Serial(port='/dev/cu.usbserial-1220', baudrate=9600, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
+# ser = serial.Serial(port='/dev/cu.usbserial-1220', baudrate=9600, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
+ser = serial.Serial(port='/dev/cu.usbmodem1101', baudrate=9600, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
 
 # Check if the connection is successful
 
@@ -103,6 +104,8 @@ class MainWindow(QMainWindow):
 
         self.frame.layout.addWidget(self.b_sensor)
 
+        self.frame.layout.setContentsMargins(0,0,0,0)
+        self.frame.layout.setSpacing(0)
         self.frame.setLayout(self.frame.layout)
         self.setCentralWidget(self.frame)
 

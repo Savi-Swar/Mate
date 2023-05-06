@@ -21,7 +21,7 @@ class CamWindow(QWidget):
 
 
         self.layout = QHBoxLayout()
-        self.layout.addWidget(Camera(0, "Rear View"))
+        # self.layout.addWidget(Camera(0, "Rear View"))
         self.layout.addWidget(Camera(0, "Front View"))
         self.setLayout(self.layout)
 
@@ -35,7 +35,7 @@ class Camera(QWidget):
 
         self.viewfinder = QLabel()
         self.viewfinder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setMinimumSize(640, 560)
+        self.setMinimumSize(1000, 560)
 
         self.thread = VideoThread(port)
         self.thread.change_pixmap_signal.connect(self.update_image)
@@ -48,9 +48,7 @@ class Camera(QWidget):
         self.label_1 = QLabel(message, self)
         self.label_1.setFont(QFont('Arial', 30))
         self.label_1.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_1.setAlignment(QtCore.Qt.AlignTop)
-
-
+        
 
         self.layout.addWidget(self.label_1)
         self.setLayout(self.layout)
@@ -63,8 +61,10 @@ class Camera(QWidget):
 
     @pyqtSlot(ndarray)
     def update_image(self, cv_img):
-        qt_img = self.convert_cv_qt(cv_img)
+        rotated_cv_img = cv2.rotate(cv_img, cv2.ROTATE_90_COUNTERCLOCKWISE)  # Rotate the video frame by 90 degrees clockwise
+        qt_img = self.convert_cv_qt(rotated_cv_img)
         self.viewfinder.setPixmap(qt_img)
+
 
     def convert_cv_qt(self, cv_img):
         rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)

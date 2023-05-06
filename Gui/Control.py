@@ -10,55 +10,8 @@ import threading
 import time
 
 from button import Button
+from thrust_control import SerialComms
 
-ser = serial.Serial(port='/dev/cu.usbserial-1220', baudrate=9600, parity=serial.PARITY_NONE, bytesize=serial.EIGHTBITS)
-
-# Check if the connection is successful
-
-HEADER = b'\xab'
-FOOTER = b'\xb3'
-forwByte = b'\xA3'
-backByte = b'\xA4'
-upByte = b'\xA5'
-downByte = b'\xA6'
-rightByte = b'\xA7'
-leftByte = b'\xA8'
-servOpenByte = b'\xA9'
-servCloseByte = b'\xA0'
-stopByte = b'\xB5'
-msg = b'\xB7'
-precision = b'\xF1'
-regular = b'\xF2'
-rapid = b'\xF3'
-pitchUpByte = b'\xC1'
-pitchDownByte = b'\xC2'
-rollRightByte = b'\xC3'
-rollLeftByte = b'\xC4'
-speed = 2
-
-def foo(msg):
-    if type(msg) == bytes:
-        msg = msg[0]
-    out = 0b0
-    for i in range(8):
-        bit = msg & 1
-        msg >>= 1
-        out |= (0 if bit else 1)
-        out <<= 1
-    return bytes([out >> 1])
-
-def sendSerial(data):
-
-        ser.write(HEADER)
-        if speed == 1:
-            speedByte = precision
-        elif speed == 2:
-            speedByte = regular
-        elif speed == 3:
-            speedByte = rapid
-        ser.write(speedByte)
-        ser.write(data)
-        ser.write(FOOTER)
 class MainWindow(QMainWindow):
     
     def __init__(self):
@@ -67,9 +20,7 @@ class MainWindow(QMainWindow):
         self.frame = QWidget()
         self.frame.setStyleSheet("background-color: #ffe7f6;")
 
-        
         # setting font and size
-
 
         self.b_auto = Button("Gui/img/automation.png", "Automation Panel")
         self.b_settings = Button("Gui/img/automation.png", "Settings Panel")
@@ -106,115 +57,79 @@ class MainWindow(QMainWindow):
         self.frame.setLayout(self.frame.layout)
         self.setCentralWidget(self.frame)
 
-        self.serial_thread = SerialThread(ser)
-        self.serial_thread.received_data.connect(self.handle_received_data)
-        self.serial_thread.start()
+        #self.serial_thread = SerialThread(ser)
+        #self.serial_thread.received_data.connect(self.handle_received_data)
+        #self.serial_thread.start()
+
+        self.sc = SerialComms("/dev/ttyu8")#cu.usbserial-1210")
+        self.horiz_speed = 0.32
+        self.vert_speed = 0.32
+        self.horiz_offset = 0.0
+        self.vert_offset = 0.0
  
     @pyqtSlot(str)
     def handle_received_data(self, data):
         print(data)
 
+    def keyEvent(self, key, m):
+        if key == Qt.Key_W:
+            self.sc.forward(self.horiz_speed * m, horiz_offset)
+        if key == Qt.Key_S:
+            self.sc.forward(-self.horiz_speed * m, horiz_offset)
+        if key == Qt.Key_D:
+            self.sc.yaw(self.horiz_speed * m)
+        if key == Qt.Key_A:
+            self.sc.yaw(-self.horiz_speed * m)
+        if key == Qt.Key_Q:
+            self.sc.up(self.vert_speed * m, vert_offset)
+        if key == Qt.Key_E:
+            self.sc.up(-self.vert_speed * m, vert_offset)
+        if key == Qt.Key_L:
+            self.sc.roll(self.vert_speed * m)
+        if key == Qt.Key_J:
+            self.sc.roll(-self.vert_speed * m)
+        if key == Qt.Key_I:
+            self.sc.pitch(self.vert_speed * m)
+        if key == Qt.Key_K:
+            self.sc.pitch(-self.vert_speed * m)
+
+        # non-releasable
+        if m == 1:
+            if key == Qt.Key_1:
+                self.horiz_speed -= 0.04
+            if key == Qt.Key_2:
+                self.horiz_speed += 0.04
+            if key == Qt.Key_3:
+                self.vert_speed -= 0.04
+            if key == Qt.Key_4:
+                self.vert_speed += 0.04
+            if key == Qt.Key_5:
+                self.horiz_offset -= 0.04
+            if key == Qt.Key_6:
+                self.horiz_offset += 0.04
+            if key == Qt.Key_7:
+                self.vert_offset -= 0.04
+            if key == Qt.Key_8:
+                self.vert_offset += 0.04    
+            if key == Qt.Key_C:
+                self.sc.claw(20)
+            if key == Qt.Key_V:
+                self.sc.claw(-20)
+
+        self.horiz_speed = max(0.04, min(1, self.horiz_speed))
+        self.vert_speed = max(0.04, min(1, self.vert_speed))
+
+        self.sc.update()
+
     # Layout 1
     def keyPressEvent(self, e):
-        global msg
-        global speed
         if e.isAutoRepeat():
-
-            if e.key() == Qt.Key_W: # FORWARD
-                if msg != forwByte:
-                    msg = forwByte
-                    sendSerial(forwByte)
-
-
-            if e.key() == Qt.Key_A: # LEFT
-                if msg != leftByte:
-                    msg = leftByte
-                    sendSerial(leftByte)
-
-
-            if e.key() == Qt.Key_S: # BACKWARD
-                if msg != backByte:
-                    msg = backByte
-                    sendSerial(backByte)
-
-
-            if e.key() == Qt.Key_D: # RIGHT
-                if msg != rightByte:
-
-                    msg = rightByte
-                    sendSerial(rightByte)
-
-          
-            if e.key() == Qt.Key_U: #UP
-                if msg != upByte:
-
-                    msg = upByte
-                    sendSerial(upByte)
-
-
-            if e.key() == Qt.Key_I: # DOWN
-                if msg != downByte:
-
-                    msg = downByte
-                    sendSerial(downByte)
-
-            if e.key() == Qt.Key_X: # OFF
-                    msg = stopByte
-                    sendSerial(stopByte)
-
-            if e.key() == Qt.Key_T:
-                if msg != pitchUpByte:
-
-                    msg = pitchUpByte
-                    sendSerial(pitchUpByte)
-            if e.key() == Qt.Key_Y:
-                if msg != pitchDownByte:
-
-                    msg = pitchDownByte
-                    sendSerial(pitchDownByte)
-            if e.key() == Qt.Key_G:
-                if msg != rollLeftByte:
-
-                    msg = rollLeftByte
-                    sendSerial(rollLeftByte)
-            if e.key() == Qt.Key_H:
-                if msg != rollRightByte:
-
-                    msg = rollRightByte
-                    sendSerial(rollRightByte)
-          
-           
-           
+            pass
         if not e.isAutoRepeat():
-            if e.key() == Qt.Key_O:
-                speed = 3
-            if e.key() == Qt.Key_K:
-                speed = 2
-            if e.key() == Qt.Key_L:
-                speed = 1
-            if e.key() == Qt.Key_N:
-
-                if msg != servOpenByte:
-
-                    msg = servOpenByte
-                    sendSerial(servOpenByte)
-
-           
-
-            if e.key() == Qt.Key_M:
-                if msg != servCloseByte:
-
-                    msg = servCloseByte
-                    sendSerial(servCloseByte)
-
-
-            
-                
+            keyEvent(self, e.key(), 1)
 
     def keyReleaseEvent(self, e):
-        global msg
-        msg = stopByte
-        sendSerial(stopByte)
+        keyEvent(self, e.key(), -1)
 
     def AutoWindow(self, checked):
         self.w = AutomationWindow()

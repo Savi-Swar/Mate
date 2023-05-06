@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
 
         self.frame.layout.setContentsMargins(0,0,0,0)
         self.frame.layout.setSpacing(0)
+        
         self.frame.setLayout(self.frame.layout)
         self.setCentralWidget(self.frame)
 

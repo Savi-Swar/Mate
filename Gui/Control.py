@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
 
         # setting font and size
 
-        self.speed_label = QLabel("H Speed: 0.4 + 0.00R, V Speed: 0.04 + 0.00R")
+        self.speed_label = QLabel("H Speed: 0.4 + 0.00y, V Speed: 0.04 + 0.00r + 0.00p")
         self.status_label = QLabel("[]")
         self.b_auto = Button("Gui/img/automation.png", "Automation Panel")
         self.b_settings = Button("Gui/img/automation.png", "Settings Panel")
@@ -74,6 +74,8 @@ class MainWindow(QMainWindow):
         self.vert_speed = 0.32
         self.horiz_offset = 0.0
         self.vert_offset = 0.0
+        self.vert_pitch_offset = 0.0
+        self.keys_pressed = set()
 
         self.updateSpeedLabel()
  
@@ -82,12 +84,13 @@ class MainWindow(QMainWindow):
         print(data)
 
     def updateSpeedLabel(self):
-        self.speed_label.setText(f"H Speed: {self.horiz_speed:.2f} {'+' if self.horiz_offset >= 0 else '-'} {abs(self.horiz_offset):.2f}, \
-        V Speed: {self.vert_speed:.2f} {'+' if self.vert_offset >= 0 else '-'} {abs(self.vert_offset):.2f}, \
+        self.speed_label.setText(f"H Speed: {self.horiz_speed:.2f} {'+' if self.horiz_offset >= 0 else '-'} {abs(self.horiz_offset):.2f}y, \
+        V Speed: {self.vert_speed:.2f} {'+' if self.vert_offset >= 0 else '-'} {abs(self.vert_offset):.2f}r {'+' if self.vert_pitch_offset >= 0 else '-'} {abs(self.vert_pitch_offset):.2f}p, \
         neutral buoyancy: {'enabled' if self.sc.enable_neutral else 'disabled'}")
-        self.status_label.setText(str(self.sc.get_real_values()))
+        rv = self.sc.get_real_values()
+        self.status_label.setText(f"{rv[0]:.2f} {rv[1]:.2f} {rv[2]:.2f} {rv[3]:.2f} {rv[4]:.2f} {rv[5]:.2f}")
 
-    def keyEvent(self, key, m):
+    def motorEvent(self, key, m):
         if key == Qt.Key_W:
             self.sc.forward(self.horiz_speed * m, self.horiz_offset)
         if key == Qt.Key_S:
@@ -97,9 +100,9 @@ class MainWindow(QMainWindow):
         if key == Qt.Key_A:
             self.sc.yaw(-self.horiz_speed * m)
         if key == Qt.Key_Q:
-            self.sc.up(self.vert_speed * m, self.vert_offset)
+            self.sc.up(self.vert_speed * m, self.vert_offset, self.vert_pitch_offset)
         if key == Qt.Key_E:
-            self.sc.up(-self.vert_speed * m, self.vert_offset)
+            self.sc.up(-self.vert_speed * m, self.vert_offset, self.vert_pitch_offset)
         if key == Qt.Key_L:
             self.sc.roll(self.vert_speed * m)
         if key == Qt.Key_J:
@@ -108,6 +111,18 @@ class MainWindow(QMainWindow):
             self.sc.pitch(self.vert_speed * m)
         if key == Qt.Key_K:
             self.sc.pitch(-self.vert_speed * m)
+
+    def keyEvent(self, key, m):
+        if m == 1:
+            self.keys_pressed.add(key)
+        else:
+            self.keys_pressed.remove(key)
+
+        self.motorEvent(key, m)
+
+        if key in [Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5, Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9, Qt.Key_0]:
+            for k in self.keys_pressed:
+                self.motorEvent(k, -1)
 
         # non-releasable
         if m == 1:
@@ -126,7 +141,11 @@ class MainWindow(QMainWindow):
             if key == Qt.Key_7:
                 self.vert_offset -= 0.01
             if key == Qt.Key_8:
-                self.vert_offset += 0.01    
+                self.vert_offset += 0.01  
+            if key == Qt.Key_9:
+                self.vert_pitch_offset -= 0.01
+            if key == Qt.Key_0:
+                self.vert_pitch_offset += 0.01  
             if key == Qt.Key_C:
                 self.sc.claw(20)
             if key == Qt.Key_V:
@@ -135,6 +154,10 @@ class MainWindow(QMainWindow):
                 self.sc.reset()
             if key == Qt.Key_P:
                 self.sc.toggle_neutral()
+        
+        if key in [Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5, Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9, Qt.Key_0]:
+            for k in self.keys_pressed:
+                self.motorEvent(k, 1)
 
         self.horiz_speed = max(0.04, min(1, self.horiz_speed))
         self.vert_speed = max(0.04, min(1, self.vert_speed))

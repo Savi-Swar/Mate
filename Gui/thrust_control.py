@@ -25,10 +25,10 @@ class SerialComms:
     # no strafe (z axis)
 
     # default up/down (y axis)
-    def up(self, speed=1, offset=0):
-        self.values[2] += 125 * speed
-        self.values[3] += 125 * speed - offset * 125 * speed
-        self.values[4] += 125 * speed + offset * 125 * speed
+    def up(self, speed=1, r_offset=0, v_offset=0):
+        self.values[2] += 125 * speed + v_offset * 125 * speed
+        self.values[3] += 125 * speed - v_offset * 125 * speed - r_offset * 125 * speed
+        self.values[4] += 125 * speed - v_offset * 125 * speed + r_offset * 125 * speed
 
     # default roll (roll cw)
     def roll(self, speed=1):
